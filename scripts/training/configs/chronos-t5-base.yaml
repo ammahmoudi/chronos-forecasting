@@ -1,14 +1,15 @@
 training_data_paths:
-- "/home/ubuntu/tsmixup-data.arrow"
-- "/home/ubuntu/kernelsynth-data.arrow"
+- "/home/amma/LLM-TIME/data/standardized/570-ws-training.arrow"
+# - "/home/ubuntu/kernelsynth-data.arrow"
 probability:
-- 0.9
-- 0.1
+- 1.0
+# - 0.1
 context_length: 512
 prediction_length: 64
 min_past: 60
 max_steps: 200_000
 save_steps: 100_000
+max_missing_prop: 0.9
 log_steps: 500
 per_device_train_batch_size: 32
 learning_rate: 0.001
@@ -29,7 +30,6 @@ tokenizer_kwargs:
   high_limit: 15.0
 n_tokens: 4096
 lr_scheduler_type: linear
-warmup_ratio: 0.0
 dataloader_num_workers: 1
-max_missing_prop: 0.9
 use_eos_token: true
+warmup_ratio: 0.0

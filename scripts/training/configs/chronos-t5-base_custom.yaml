@@ -1,0 +1,37 @@
+context_length: 512
+dataloader_num_workers: 1
+gradient_accumulation_steps: 1
+learning_rate: 0.001
+log_steps: 200
+lora_alpha: 32
+lora_dropout: 0.05
+lora_r: 16
+lr_scheduler_type: linear
+max_missing_prop: 0.9
+max_steps: 1000
+min_past: 60
+model_id: amazon/chronos-t5-base
+model_type: seq2seq
+n_tokens: 4096
+ntokens: 4096
+num_samples: 20
+optim: adamw_torch_fused
+output_dir: ./experiment_configs_chronos_training/seed_831363_model_amazon_chronos-t5-base_dtype_float32_mode_training_context_512_pred_64/patient_584/logs/logs_2025-03-17_09-55-24/chronos-t5-base
+per_device_train_batch_size: 8
+prediction_length: 64
+probability:
+- 1.0
+random_init: false
+save_steps: 500
+seed: 831363
+shuffle_buffer_length: 100000
+tf32: true
+tie_embeddings: true
+tokenizer_class: MeanScaleUniformBins
+tokenizer_kwargs: '{''low_limit'': -15,''high_limit'': 15}'
+torch_compile: true
+training_data_paths:
+- /home/amma/LLM-TIME/data/standardized_arrow/584-ws-training.arrow
+use_eos_token: true
+use_peft: true
+warmup_ratio: 0.0

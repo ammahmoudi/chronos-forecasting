@@ -21,6 +21,9 @@ import chronos
 from chronos.base import BaseChronosPipeline, ForecastType
 from chronos.utils import left_pad_and_stack_1D
 
+from peft import PeftModel
+from pathlib import Path
+
 logger = logging.getLogger(__file__)
 
 
@@ -557,24 +560,44 @@ class ChronosPipeline(BaseChronosPipeline):
         return quantiles, mean
 
     @classmethod
-    def from_pretrained(cls, *args, **kwargs):
+    def from_pretrained(cls, pretrained_model_name_or_path, lora_path: Optional[str] = None, *args, **kwargs):
         """
-        Load the model, either from a local path or from the HuggingFace Hub.
-        Supports the same arguments as ``AutoConfig`` and ``AutoModel``
-        from ``transformers``.
+        Load the Chronos model, optionally with a PEFT LoRA adapter.
+
+        Parameters:
+        ----------
+        pretrained_model_name_or_path : str or Path
+            Path to the base model directory (local or Hugging Face Hub).
+        lora_path : Optional[str], default=None
+            Path to a LoRA checkpoint directory. If None, LoRA is not applied.
+        
+        Returns:
+        -------
+        ChronosPipeline instance with base model or LoRA-adapted model.
         """
 
-        config = AutoConfig.from_pretrained(*args, **kwargs)
+        # Load model config
+        config = AutoConfig.from_pretrained(pretrained_model_name_or_path, **kwargs)
 
         assert hasattr(config, "chronos_config"), "Not a Chronos config file"
 
         chronos_config = ChronosConfig(**config.chronos_config)
 
+        # Load base model (Seq2Seq or Causal)
         if chronos_config.model_type == "seq2seq":
-            inner_model = AutoModelForSeq2SeqLM.from_pretrained(*args, **kwargs)
+            inner_model = AutoModelForSeq2SeqLM.from_pretrained(pretrained_model_name_or_path, **kwargs)
         else:
             assert chronos_config.model_type == "causal"
-            inner_model = AutoModelForCausalLM.from_pretrained(*args, **kwargs)
+            inner_model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path, **kwargs)
+
+        # Apply LoRA if a path is provided
+        if lora_path:
+            lora_ckpt_path = Path(lora_path)
+            if lora_ckpt_path.exists():
+                logger.info(f"Loading LoRA adapters from {lora_ckpt_path}")
+                inner_model = PeftModel.from_pretrained(inner_model, str(lora_ckpt_path))
+            else:
+                logger.warning(f"LoRA path '{lora_ckpt_path}' not found. Using base model.")
 
         return cls(
             tokenizer=chronos_config.create_tokenizer(),
