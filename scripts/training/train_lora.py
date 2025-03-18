@@ -192,7 +192,7 @@ def load_model(
 
     model.config.pad_token_id = model.generation_config.pad_token_id = pad_token_id
     model.config.eos_token_id = model.generation_config.eos_token_id = eos_token_id
-    
+
     # Apply PEFT (LoRA)
     if use_peft:
         log_on_main("Applying LoRA adaptation", logger)
@@ -556,6 +556,10 @@ def main(
     top_k: int = 50,
     top_p: float = 1.0,
     seed: Optional[int] = None,
+    use_peft: bool = False,
+    lora_r: Optional[int] = 16,  # LoRA rank
+    lora_alpha: Optional[int] = 32,  # Scaling factor
+    lora_dropout: Optional[float] = 0.05,
 ):
     if tf32 and not (
         torch.cuda.is_available() and torch.cuda.get_device_capability()[0] >= 8
@@ -639,10 +643,10 @@ def main(
         tie_embeddings=tie_embeddings,
         pad_token_id=pad_token_id,
         eos_token_id=eos_token_id,
-        use_peft=True,  # Enable LoRA
-        lora_r=16,       # LoRA rank
-        lora_alpha=32,   # Scaling factor
-        lora_dropout=0.05
+        use_peft=use_peft,  # Enable LoRA
+        lora_r=lora_r,  # LoRA rank
+        lora_alpha=lora_alpha,  # Scaling factor
+        lora_dropout=lora_dropout,
     )
 
     chronos_config = ChronosConfig(
@@ -712,13 +716,15 @@ def main(
 
     # After training, save LoRA adapters properly
     if is_main_process():
-        # output_dir = Path(output_dir)
         
         # Save the LoRA fine-tuned model
-        model.save_pretrained(output_dir / "checkpoint-final")  # ✅ Use this
+        save_dir = (
+            output_dir / "lora-final" if use_peft else output_dir / "checkpoint-final"
+        )
+        model.save_pretrained(save_dir)  # ✅ Use this
 
         # Save training information
-        save_training_info(output_dir / "checkpoint-final", training_config=raw_training_config)
+        save_training_info(save_dir, training_config=raw_training_config)
 
 
 if __name__ == "__main__":

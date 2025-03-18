@@ -3,9 +3,6 @@ dataloader_num_workers: 1
 gradient_accumulation_steps: 1
 learning_rate: 0.001
 log_steps: 200
-lora_alpha: 32
-lora_dropout: 0.05
-lora_r: 16
 lr_scheduler_type: linear
 max_missing_prop: 0.9
 max_steps: 1000
@@ -16,7 +13,7 @@ n_tokens: 4096
 ntokens: 4096
 num_samples: 20
 optim: adamw_torch_fused
-output_dir: ./experiment_configs_chronos_training/seed_831363_model_amazon_chronos-t5-base_dtype_float32_mode_training_context_512_pred_64/patient_584/logs/logs_2025-03-17_09-55-24/chronos-t5-base
+output_dir: ./experiment_configs_chronos_missing_analysis/seed_831363_model_amazon-chronos-t5-base_dtype_float32_mode_random_context_6_pred_9/patient_570/logs/logs_2025-03-17_22-55-57/chronos-t5-base
 per_device_train_batch_size: 8
 prediction_length: 64
 probability:
@@ -31,7 +28,6 @@ tokenizer_class: MeanScaleUniformBins
 tokenizer_kwargs: '{''low_limit'': -15,''high_limit'': 15}'
 torch_compile: true
 training_data_paths:
-- /home/amma/LLM-TIME/data/standardized_arrow/584-ws-training.arrow
+- ./data/missing_values/570-random-training.arrow
 use_eos_token: true
-use_peft: true
 warmup_ratio: 0.0
